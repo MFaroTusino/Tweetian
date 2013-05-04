@@ -16,6 +16,8 @@
     along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <QDeclarativeError>
+#include <QDebug>
 #include <QtGui/QApplication>
 #include <QtDeclarative/QDeclarativeContext>
 #include <QtDeclarative/QDeclarativeView>
@@ -23,31 +25,25 @@
 #include <QtCore/QTranslator>
 #include <QtCore/QLocale>
 #include <QtCore/QFile>
-#include "qmlapplicationviewer.h"
-
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
+#include <QtCore/QTextCodec>
+#include <QtCore/QAbstractEventDispatcher>
 #include <QtGui/QSplashScreen>
 #include <QtGui/QPixmap>
-#endif
 
+#include "qmlapplicationviewer.h"
+#include "src/socialinvocation.h"
 #include "src/qmlutils.h"
 #include "src/imageuploader.h"
 #include "src/thumbnailcacher.h"
 #include "src/userstream.h"
 #include "src/networkmonitor.h"
 
-#if defined(Q_OS_HARMATTAN) || defined(Q_WS_SIMULATOR)
-#include "src/harmattanutils.h"
-#endif
-
-#ifdef Q_OS_HARMATTAN
-#include <QtDBus/QDBusConnection>
-#include "src/tweetianif.h"
-#endif
-
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QScopedPointer<QApplication> app(createApplication(argc, argv));
+
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+    QTextCodec::setCodecForTr(codec);
 
     QString lang = QLocale::system().name();
     lang.truncate(2); // ignore the country code
@@ -61,65 +57,47 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     }
 
     QTranslator translator;
-    if (QFile::exists(":/i18n/tweetian_" + lang + ".qm")) {
+    if (QFile::exists("app/native/i18n/tweetian_" + lang + ".qm")) {
         qDebug("Translation for \"%s\" exists", qPrintable(lang));
-        translator.load("tweetian_" + lang, ":/i18n");
+        bool loaded = translator.load("tweetian_" + lang, "app/native/i18n");
+        qDebug ("Language loaded: %s", (loaded == true)?"OK":"FAIL" );
     }
     else {
         qDebug("Translation for \"%s\" not exists, using the default language (en)", qPrintable(lang));
-        translator.load("tweetian_en", ":/i18n");
+        translator.load("tweetian_en", "app/native/i18n");
     }
     app->installTranslator(&translator);
 
     app->setApplicationName("Tweetian");
-    app->setOrganizationName("Tweetian");
+    app->setOrganizationName("BB4 Software");
     app->setApplicationVersion(APP_VERSION);
 
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
-    QSplashScreen *splash = new QSplashScreen(QPixmap(":/splash/tweetian-splash-symbian.jpg"));
+    QSplashScreen *splash = new QSplashScreen(QPixmap("app/native/splash/tweetian-splash-symbian.jpg"));
     splash->show();
     splash->showMessage(QSplashScreen::tr("Loading..."), Qt::AlignHCenter | Qt::AlignBottom, Qt::white);
-#endif
 
     QDeclarativeView view;
-
-#ifdef Q_OS_HARMATTAN
-    new TweetianIf(app.data(), &view);
-    QDBusConnection bus = QDBusConnection::sessionBus();
-    bus.registerService("com.tweetian");
-    bus.registerObject("/com/tweetian", app.data());
-#endif
-
     QMLUtils qmlUtils(&view);
-    view.rootContext()->setContextProperty("QMLUtils", &qmlUtils);
     ThumbnailCacher thumbnailCacher;
-    view.rootContext()->setContextProperty("thumbnailCacher", &thumbnailCacher);
     NetworkMonitor networkMonitor;
+
+    view.rootContext()->setContextProperty("SocialInvocation", new SocialInvocation());   
+    view.rootContext()->setContextProperty("QMLUtils", &qmlUtils);
+    view.rootContext()->setContextProperty("thumbnailCacher", &thumbnailCacher);
     view.rootContext()->setContextProperty("networkMonitor", &networkMonitor);
     view.rootContext()->setContextProperty("APP_VERSION", APP_VERSION);
 
-#if defined(Q_OS_HARMATTAN) || defined(Q_WS_SIMULATOR)
-    HarmattanUtils harmattanUtils;
-    view.rootContext()->setContextProperty("harmattanUtils", &harmattanUtils);
-#endif
 
     qmlRegisterType<ImageUploader>("Uploader", 1, 0, "ImageUploader");
     qmlRegisterType<UserStream>("UserStream", 1, 0, "UserStream");
 
-#if defined(Q_OS_HARMATTAN)
-    view.setSource(QUrl("qrc:/qml/tweetian-harmattan/main.qml"));
-#elif defined(Q_OS_SYMBIAN)
-    view.setSource(QUrl("qrc:/qml/tweetian-symbian/main.qml"));
-#else
-    view.setSource(QUrl("qrc:/qml/tweetian-harmattan/main.qml"));
-#endif
+
+    view.setSource(QUrl("app/native/qml/tweetian-symbian/main.qml"));
 
     view.showFullScreen();
 
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
     splash->finish(&view);
     splash->deleteLater();
-#endif
 
     return app->exec();
 }
