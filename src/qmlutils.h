@@ -38,6 +38,9 @@ public:
     // Return the image path if save successfully or empty string if failed
     Q_INVOKABLE QString saveImage(QDeclarativeItem *imageObject) const;
 
+    //Added to use the BB10 image previewer
+    Q_INVOKABLE QString saveTwitterImage(QDeclarativeItem *imageObject) const;
+
     // Minimize the app, only on Symbian
     Q_INVOKABLE void minimizeApp() const;
 

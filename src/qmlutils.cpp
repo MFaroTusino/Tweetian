@@ -29,6 +29,8 @@
 #include <QtDeclarative/QDeclarativeView>
 #include <QtDeclarative/QDeclarativeEngine>
 #include <QtNetwork/QNetworkAccessManager>
+#include <QFile>
+#include <QDir>
 
 static const QString IMAGE_SAVING_PATH = QDesktopServices::storageLocation(QDesktopServices::PicturesLocation);
 #if defined(Q_OS_HARMATTAN)
@@ -66,6 +68,31 @@ QString QMLUtils::saveImage(QDeclarativeItem *imageObject) const
     QStyleOptionGraphicsItem styleOption;
     imageObject->paint(&painter, &styleOption, 0);
     bool saved = img.save(filePath, "PNG");
+
+    if (!saved) {
+        qWarning("QMLUtils::saveImage: Failed to save image to %s", qPrintable(filePath));
+        return "";
+    }
+
+    return filePath;
+}
+
+//Added to use the BB10 image previewer
+QString QMLUtils::saveTwitterImage(QDeclarativeItem *imageObject) const
+{
+    QString fileName = "tweetian_image.jpg";
+    QString filePath = QDir::homePath()  + "/" + fileName;
+    QFile imageFile (filePath);
+
+    if(imageFile.exists())
+        imageFile.remove();
+
+    QImage img(imageObject->boundingRect().size().toSize(), QImage::Format_ARGB32);
+    img.fill(QColor(0,0,0,0).rgba());
+    QPainter painter(&img);
+    QStyleOptionGraphicsItem styleOption;
+    imageObject->paint(&painter, &styleOption, 0);
+    bool saved = img.save(filePath, "JPG", 80);
 
     if (!saved) {
         qWarning("QMLUtils::saveImage: Failed to save image to %s", qPrintable(filePath));

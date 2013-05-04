@@ -30,7 +30,11 @@ ImageUploader::~ImageUploader()
 
 void ImageUploader::setFile(const QString &fileName)
 {
-    m_fileName = fileName;
+    if(fileName.startsWith("file:///")) /* patch to the BB10 platform */
+        m_fileName = QUrl(fileName).toLocalFile();
+
+    else
+        m_fileName = fileName;
 }
 
 void ImageUploader::setAuthorizationHeader(const QString &authorizationHeader)

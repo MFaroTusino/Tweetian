@@ -36,7 +36,7 @@ ThumbnailCacher::ThumbnailCacher(QObject *parent) :
     cacheDir.cd(".thumbnails");
 
     cachePath = cacheDir.absolutePath();
-#elif defined (Q_OS_LINUX) // On Linux, cachePath should be /home/user/.thumbnails/tweetian
+#elif defined (Q_OS_LINUX) || defined (Q_OS_BLACKBERRY)//  Q_OS_BLACKBERRY added
     QDir cacheDir = QDir::homePath();
     if (!cacheDir.exists(".thumbnails/tweetian")) cacheDir.mkpath(".thumbnails/tweetian");
     cacheDir.cd(".thumbnails/tweetian");
