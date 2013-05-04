@@ -40,6 +40,7 @@ Item {
         source: mouseArea.pressed ? "../Image/header-pressed.png" : "../Image/header.png"
     }
 
+    /*
     Image {
         anchors { top: parent.top; left: parent.left }
         source: "../Image/meegoTLCorner.png"
@@ -48,7 +49,7 @@ Item {
     Image {
         anchors { top: parent.top; right: parent.right }
         source: "../Image/meegoTRCorner.png"
-    }
+    } */
 
     Image {
         id: icon
@@ -100,7 +101,7 @@ Item {
         id: mouseArea
         anchors.fill: parent
         onClicked: root.clicked()
-        onPressed: basicHapticEffect.play()
-        onReleased: basicHapticEffect.play()
+        //onPressed: basicHapticEffect.play() 
+        //onReleased: basicHapticEffect.play()  
     }
 }

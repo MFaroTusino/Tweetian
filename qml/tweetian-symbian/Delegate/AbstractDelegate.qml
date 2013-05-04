@@ -35,8 +35,9 @@ Item {
     property int __originalHeight: height // private
 
     implicitWidth: ListView.view ? ListView.view.width : 0
-    implicitHeight: Math.max(contentColumn.height, profileImage.height) + 2 * constant.paddingLarge
+    implicitHeight: Math.max(contentColumn.height, profileImage.height) + (2 * constant.paddingMedium - 8)
 
+    /*
     BorderImage {
         id: highlight
         border {
@@ -47,6 +48,12 @@ Item {
         }
         opacity: 0
         anchors.fill: parent
+    } */
+    Rectangle{
+        id: highlight
+
+        opacity: 0
+        anchors.fill: parent
     }
 
     PropertyAnimation {
@@ -55,7 +62,7 @@ Item {
         property: "opacity"
         to: 0
         easing.type: Easing.Linear
-        duration: 150
+        duration: 100
     }
 
     Rectangle {
@@ -99,7 +106,9 @@ Item {
 
     Image {
         id: profileImage
-        anchors { top: parent.top; left: parent.left; margins: constant.paddingLarge }
+        anchors { top: parent.top; left: parent.left;
+            margins: constant.paddingMedium
+             topMargin: constant.paddingMedium }
         height: constant.graphicSizeMedium; width: constant.graphicSizeMedium
         sourceSize { height: height; width: width }
         asynchronous: true
@@ -109,7 +118,7 @@ Item {
             target: profileImage
             property: "opacity"
             from: 0; to: 1
-            duration: 250
+            duration: 100
         }
 
         Binding {
@@ -143,11 +152,18 @@ Item {
             else movementEndedSignal.target = root.ListView.view
         }
     }
+    Rectangle { // rounded corners for img
+        anchors.fill: profileImage
+        color: "transparent"
+        border.color: constant.colorBackground
+        border.width: 6
+        radius: 8
+    }
 
     Column {
         id: contentColumn
         anchors {
-            top: parent.top; topMargin: constant.paddingLarge
+            top: parent.top; topMargin: constant.paddingSmall
             left: profileImage.right; leftMargin: constant.paddingMedium
             right: parent.right
             rightMargin: subIconLoader.status == Loader.Ready
@@ -158,16 +174,15 @@ Item {
     }
 
     MouseArea {
+        preventStealing : false
         anchors.fill: parent
         enabled: root.enabled
         onClicked: root.clicked()
         onPressed: {
-            listItemHapticEffect.play()
-            highlight.source = "../Image/list_pressed.svg"
+            highlight.color = "#00a8df"
             highlight.opacity = 1
         }
         onReleased: {
-            listItemHapticEffect.play()
             highlightFadeOut.restart()
         }
         onCanceled: highlightFadeOut.restart()
@@ -180,6 +195,7 @@ Item {
         onTriggered: height = __originalHeight
     }
 
+    /*
     NumberAnimation {
         id: onAddAnimation
         target: root
@@ -187,7 +203,7 @@ Item {
         duration: 250
         from: 0.25; to: 1
         easing.type: Easing.OutBack
-    }
+    } */
 
     ListView.onAdd: {
         if (root.ListView.view.stayAtCurrentPosition) {
@@ -196,6 +212,6 @@ Item {
             height = 0
             pause.start()
         }
-        else onAddAnimation.start()
+        /*else onAddAnimation.start()*/
     }
 }

@@ -153,7 +153,8 @@ Item {
 
     Timer {
         id: autoRefreshTimer
-        interval: settings.autoRefreshInterval * 60000
+        interval: type == "Timeline" ? settings.timelineRefreshFreq * 60000
+                                     : settings.mentionsRefreshFreq * 60000
         running: networkMonitor.online && !settings.enableStreaming
         repeat: true
         onTriggered: refresh("newer")
@@ -175,6 +176,7 @@ Item {
         }
 
         function successCallback(data) {
+
             networkMonitor.setToOnline()
             var msg = {
                 type: reloadType,

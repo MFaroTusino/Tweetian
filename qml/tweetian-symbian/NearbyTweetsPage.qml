@@ -18,7 +18,7 @@
 
 import QtQuick 1.1
 import com.nokia.symbian 1.1
-import QtMobility.location 1.2
+import QtMobilitySubset.location 1.1
 import "Services/Twitter.js" as Twitter
 import "Utils/Calculations.js" as Calculate
 import "Component"
@@ -35,13 +35,13 @@ Page {
     tools: ToolBarLayout {
         ToolButtonWithTip {
             id: backButton
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             opacity: enabled ? 1 : 0.25
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
         ToolButtonWithTip {
-            iconSource: "toolbar-menu"
+            iconSource: "Image/icon_menu.png"
             toolTipText: qsTr("Menu")
             onClicked: menu.open()
         }

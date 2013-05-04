@@ -29,7 +29,7 @@ Page {
     tools: ToolBarLayout {
         ToolButtonWithTip {
             toolTipText: qsTr("Back")
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             onClicked: pageStack.pop()
         }
         ToolButton {

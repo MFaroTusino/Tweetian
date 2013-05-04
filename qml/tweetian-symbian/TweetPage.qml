@@ -28,6 +28,7 @@ import "Services/Instapaper.js" as Instapaper
 import "Services/TwitLonger.js" as TwitLonger
 import "Services/NokiaMaps.js" as Maps
 import "Services/Youtube.js" as YouTube
+import "Services/NineGag.js" as NineGag
 import "TweetPageJS.js" as JS
 
 Page {
@@ -59,20 +60,21 @@ Page {
     tools: ToolBarLayout {
         ToolButtonWithTip {
             id: backButton
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
+
         ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/reply_inverse.png" : "Image/reply.png"
-            toolTipText: qsTr("Reply All")
+            iconSource:  "Image/icon_share.png"
+            toolTipText: qsTr("Share")
             onClicked: {
-                var prop = { type: "Reply", placedText: JS.contructReplyText(), tweetId: tweet.id }
-                pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), prop)
+                tweetShare.open();
             }
         }
+
         ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/retweet_inverse.png" : "Image/retweet.png"
+            iconSource:  "Image/icon_retweet.png"
             toolTipText: qsTr("Retweet")
             onClicked: {
                 var prop = { type: "RT", placedText: JS.contructRetweetText(), tweetId: tweet.id }
@@ -80,8 +82,7 @@ Page {
             }
         }
         ToolButtonWithTip {
-            iconSource: favouritedTweet ? "Image/unfavourite.png"
-                                        : (platformInverted ? "Image/favourite_inverse.svg" : "Image/favourite.svg")
+            iconSource: favouritedTweet ? "Image/unfavourite.png" : ( "Image/icon_favorite.png")
             toolTipText: favouritedTweet ? qsTr("Unfavourite") : qsTr("Favourite")
             onClicked: {
                 if (favouritedTweet) Twitter.postUnfavourite(tweet.id, JS.favouriteOnSuccess, JS.commonOnFailure)
@@ -90,7 +91,7 @@ Page {
             }
         }
         ToolButtonWithTip {
-            iconSource: "toolbar-menu"
+            iconSource: "Image/icon_menu.png"
             toolTipText: qsTr("Menu")
             onClicked: tweetMenu.open()
         }
@@ -101,7 +102,8 @@ Page {
         platformInverted: settings.invertedTheme
 
         MenuLayout {
-            MenuItem {
+            MenuItemWithIcon {
+                iconSource: "Image/icon_copy.png"
                 text: qsTr("Copy tweet")
                 platformInverted: tweetMenu.platformInverted
                 onClicked: {
@@ -133,11 +135,43 @@ Page {
                     dialog.createOpenLinkDialog(permalink)
                 }
             }
-            MenuItem {
+            MenuItemWithIcon {
+                iconSource: "Image/icon_delete.png"
                 text: qsTr("Delete tweet")
                 platformInverted: tweetMenu.platformInverted
                 visible: tweet.retweetScreenName === settings.userScreenName
                 onClicked: JS.createDeleteTweetDialog()
+            }
+        }
+    }
+    Menu {
+        id: tweetShare
+        platformInverted: settings.invertedTheme
+
+        MenuLayout {
+            MenuItemWithIcon {
+                iconSource: "Image/share_bbm.png"
+                text: qsTr("Share BBM")
+                platformInverted: tweetMenu.platformInverted
+                onClicked: {
+                    SocialInvocation.shareText("bbm","THE URI", "@" + tweet.screenName + ": " + tweet.plainText)
+                }
+            }
+            MenuItemWithIcon {
+                iconSource: "Image/share_email.png"
+                text: qsTr("Share Email")
+                platformInverted: tweetMenu.platformInverted
+                onClicked: {
+                    SocialInvocation.shareText("email","THE URI", "@" + tweet.screenName + ": " + tweet.plainText)
+                }
+            }
+            MenuItemWithIcon {
+                iconSource: "Image/share_facebook.png"
+                text: qsTr("Share Facebook")
+                platformInverted: tweetMenu.platformInverted
+                onClicked: {
+                    SocialInvocation.shareText("facebook","THE URI", "@" + tweet.screenName + ": " + tweet.plainText)
+                }
             }
         }
     }
@@ -149,7 +183,7 @@ Page {
 
         Column {
             id: mainColumn
-            anchors { left: parent.left; right: parent.right }
+            anchors { left: parent.left; right: parent.right ;  rightMargin: 20}
             height: childrenRect.height
 
             Column {
@@ -164,7 +198,7 @@ Page {
 
             Column {
                 id: mainTweetColumn
-                anchors { left: parent.left; right: parent.right }
+                anchors { left: parent.left; right: parent.right ; leftMargin: 10}
                 height: childrenRect.height + constant.paddingMedium
                 spacing: constant.paddingMedium
 
@@ -178,7 +212,7 @@ Page {
                     Image {
                         id: profileImage
                         anchors { top: parent.top; left: parent.left; margins: constant.paddingMedium }
-                        height: 50; width: 50
+                        height: 100; width: 100
                         sourceSize { height: height; width: width }
                         asynchronous: true
 
@@ -219,7 +253,6 @@ Page {
                     wrapMode: Text.Wrap
                     text: tweet.richText || ""
                     onLinkActivated: {
-                        basicHapticEffect.play()
                         if (link.indexOf("@") === 0)
                             pageStack.push(Qt.resolvedUrl("UserPage.qml"), {screenName: link.substring(1)})
                         else if (link.indexOf("http") === 0)
@@ -275,8 +308,108 @@ Page {
                     Repeater {
                         model: ListModel { id: thumbnailModel }
 
+                        Item {
+                            id: imageContainer
+                            signal clicked
+                            property bool showLoading: false
+
+                            width: constant.thumbnailSize * 2 ; height: constant.thumbnailSize * 2
+                            clip: true
+
+                            Image {
+                                id: mainImage
+                                //anchors.fill: parent
+                                anchors.centerIn: parent
+                                fillMode: Image.PreserveAspectCrop
+                                source: networkMonitor.online ? model.full : ""
+                                cache: false
+                                asynchronous: true
+                                sourceSize.height: 1000
+                            }
+                            Loader {
+                                anchors.centerIn: parent
+                                sourceComponent: {
+                                    if (showLoading) return loading
+                                    else {
+                                        switch (mainImage.status) {
+                                        case Image.Loading:
+                                            return loading
+                                        case Image.Ready:
+                                            return undefined
+                                        case Image.Null:
+                                        case Image.Error:
+                                            return iconImage
+                                        }
+                                    }
+                                }
+                            }
+
+                            Component {
+                                id: loading
+
+                                BusyIndicator {
+                                    width: constant.graphicSizeSmall; height: constant.graphicSizeSmall
+                                    running: true
+                                    platformInverted: !settings.invertedTheme
+                                }
+                            }
+                            Component {
+                                id: iconImage
+
+                                Image {
+                                    sourceSize { width: constant.graphicSizeMedium; height: constant.graphicSizeMedium }
+                                    source: {
+                                        switch (model.type) {
+                                        case "image":
+                                            return settings.invertedTheme ? "Image/photos_inverse.svg" : "Image/photos.svg"
+                                        case "map":
+                                            return settings.invertedTheme ? "Image/location_mark_inverse.svg" : "Image/location_mark.svg"
+                                        case "video":
+                                            return settings.invertedTheme ? "Image/video_inverse.svg" : "Image/video.svg"
+                                        default:
+                                            console.log("Invalid type: " + model.type); return ""
+                                        }
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: imagePress
+                                anchors.fill: parent
+                                onClicked: {
+                                    if (model.type === "image"){
+                                        var filePath = QMLUtils.saveTwitterImage(mainImage)
+                                        if (filePath) {
+                                            SocialInvocation.showImage(filePath);
+                                        }
+                                        else pageStack.push(Qt.resolvedUrl("TweetImage.qml"), {"imageLink": model.link,"imageUrl": model.full})
+                                    }
+                                    else if (model.type === "map")
+                                        pageStack.push(Qt.resolvedUrl("MapPage.qml"), {latitude: tweet.latitude, longitude: tweet.longitude})
+                                    else { // model.type === "video"
+                                        if (model.link) {
+                                            var success = Qt.openUrlExternally(model.link)
+                                            if (!success) infoBanner.showText(qsTr("Error opening link: %1").arg(model.link))
+                                        }
+                                        else infoBanner.showText(qsTr("Streaming link is not available"))
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                id: cover
+                                anchors.fill: parent
+                                color: "transparent"
+                                border.width: constant.paddingSmall
+                                border.color: imagePress.pressed ? constant.colorTextSelection : constant.colorMid
+                            }
+                        }
+
+                        /*
                         ThumbnailItem {
-                            imageSource: model.thumb
+                            id: thumbnailImg
+                            //imageSource: model.thumb
+                            imageSource: model.full
                             iconSource: {
                                 switch (model.type) {
                                 case "image":
@@ -290,8 +423,12 @@ Page {
                                 }
                             }
                             onClicked: {
-                                if (model.type === "image")
-                                    pageStack.push(Qt.resolvedUrl("TweetImage.qml"), {"imageLink": model.link,"imageUrl": model.full})
+                                if (model.type === "image"){
+                                    //pageStack.push(Qt.resolvedUrl("TweetImage.qml"), {"imageLink": model.link,"imageUrl": model.full})
+                                    var filePath = QMLUtils.saveTwitterImage(thumbnailImg.mainImage)
+                                    if (filePath) infoBanner.showText(qsTr("Image saved in %1").arg(filePath))
+                                    else infoBanner.showText(qsTr("Failed to save image"))
+                                }
                                 else if (model.type === "map")
                                     pageStack.push(Qt.resolvedUrl("MapPage.qml"), {latitude: tweet.latitude, longitude: tweet.longitude})
                                 else { // model.type === "video"
@@ -302,7 +439,7 @@ Page {
                                     else infoBanner.showText(qsTr("Streaming link is not available"))
                                 }
                             }
-                        }
+                        } */
                     }
                 }
             }
@@ -379,12 +516,23 @@ Page {
 
     ScrollDecorator { platformInverted: settings.invertedTheme; flickableItem: tweetPageFlickable }
 
+    /*
     PageHeader {
         id: header
         headerIcon: "Image/chat.png"
         headerText: qsTr("Tweet")
         onClicked: tweetPageFlickable.contentY = 0
+    } */
+    TweetPageHeader {
+        id: header
+        headerIcon: "Image/chat.png"
+        headerText: qsTr("Tweet")
+        onClicked: {
+            var prop = { type: "Reply", placedText: JS.contructReplyText(), tweetId: tweet.id }
+            pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), prop)
+        }
     }
+
 
     WorkerScript {
         id: conversationParser

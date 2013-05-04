@@ -28,37 +28,58 @@ Page {
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
+
         ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/undo_inverse.svg" : "Image/undo.svg"
-            enabled: tweetImagePreview.scale !== pinchArea.minScale
-            toolTipText: qsTr("Reset Zoom")
-            onClicked: {
-                imageFlickable.returnToBounds()
-                bounceBackAnimation.to = pinchArea.minScale
-                bounceBackAnimation.start()
-            }
+            iconSource: "Image/icon_menu.png"
+            toolTipText: qsTr("Menu")
+            onClicked: tweetImageMenu.open()
         }
-        ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/internet_inverse.svg" : "Image/internet.svg"
-            enabled: imageLink != ""
-            toolTipText: qsTr("Open Link")
-            onClicked: dialog.createOpenLinkDialog(imageLink)
-        }
-        ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/save_inverse.svg" : "Image/save.svg"
-            toolTipText: qsTr("Save Image")
-            enabled: tweetImagePreview.status == Image.Ready
-            onClicked: {
-                var filePath = QMLUtils.saveImage(tweetImagePreview)
-                if (filePath) infoBanner.showText(qsTr("Image saved in %1").arg(filePath))
-                else infoBanner.showText(qsTr("Failed to save image"))
+    }
+
+    Menu {
+        id: tweetImageMenu
+        platformInverted: settings.invertedTheme
+
+        MenuLayout {
+            MenuItemWithIcon {
+                enabled: imageLink != ""
+                      iconSource: "Image/internet.svg"
+                      text: qsTr("Open link in web browser")
+                      //platformInverted: root.platformInverted
+                      onClicked: {
+                          Qt.openUrlExternally(imageLink)
+                          infoBanner.showText(qsTr("Launching web browser..."))
+                      }
+                  }
+            MenuItemWithIcon {
+                enabled: imageLink != ""
+                     iconSource: "image://theme/qtg_toolbar_copy"
+                     text: qsTr("Copy link")
+                     //platformInverted: root.platformInverted
+                     onClicked: {
+                         QMLUtils.copyToClipboard(imageLink)
+                         infoBanner.showText(qsTr("Link copied to clipboard"))
+                     }
+                 }
+
+            MenuItemWithIcon {
+                iconSource: "Image/save.svg"
+                text: qsTr("Save Image")
+                //platformInverted: tweetImageMenu.platformInverted
+                enabled: tweetImagePreview.status == Image.Ready
+                onClicked: {
+                    var filePath = QMLUtils.saveImage(tweetImagePreview)
+                    if (filePath) infoBanner.showText(qsTr("Image saved in %1").arg(filePath))
+                    else infoBanner.showText(qsTr("Failed to save image"))
+                }
             }
         }
     }
+
 
     Flickable {
         id: imageFlickable
@@ -102,7 +123,7 @@ Page {
                     id: loadedAnimation
                     target: tweetImagePreview
                     property: "opacity"
-                    duration: 250
+                    duration: 100
                     from: 0; to: 1
                     easing.type: Easing.InOutQuad
                 }

@@ -18,11 +18,13 @@
 
 import QtQuick 1.1
 import com.nokia.symbian 1.1
-import QtMobility.location 1.2
+import QtMobilitySubset.location 1.1
 import "Services/Twitter.js" as Twitter
 import "Services/TwitLonger.js" as TwitLonger
 import "Component"
 import Uploader 1.0
+import bb.platform 1.0
+import bb.cascades.pickers 1.0
 
 Page {
     id: newTweetPage
@@ -41,58 +43,23 @@ Page {
 
     tools: ToolBarLayout {
         enabled: !preventTouch.enabled
-        ToolButton {
-            id: tweetButton
-            text: {
-                switch (type) {
-                case "New": return qsTr("Tweet")
-                case "Reply": return qsTr("Reply")
-                case "RT": return qsTr("Retweet")
-                case "DM": return qsTr("DM")
-                }
-            }
-            enabled: (tweetTextArea.text.length != 0 || addImageButton.checked)
-                     && ((settings.enableTwitLonger && !addImageButton.checked) || !tweetTextArea.errorHighlight)
-                     && !header.busy
-            platformInverted: settings.invertedTheme
-            onClicked: {
-                // remove focus on text field for force commit pre-edit text
-                tweetTextArea.parent.focus = true;
-                if (type == "New" || type == "Reply") {
-                    if (addImageButton.checked) imageUploader.run()
-                    else {
-                        if (tweetTextArea.errorHighlight) internal.createUseTwitLongerDialog()
-                        else {
-                            Twitter.postStatus(tweetTextArea.text, tweetId ,latitude, longitude,
-                                               internal.postStatusOnSuccess, internal.commonOnFailure)
-                            header.busy = true
-                        }
-                    }
-                }
-                else if (type == "RT") {
-                    Twitter.postRetweet(tweetId, internal.postStatusOnSuccess, internal.commonOnFailure)
-                    header.busy = true
-                }
-                else if (type == "DM") {
-                    Twitter.postDirectMsg(tweetTextArea.text, screenName,
-                                          internal.postStatusOnSuccess, internal.commonOnFailure)
-                    header.busy = true
-                }
-            }
-        }
-        ToolButton {
+
+        ToolButtonWithTip {
             id: cancelButton
-            text: qsTr("Cancel")
-            platformInverted: settings.invertedTheme
+            iconSource: "Image/ic_back_button.png"
+            toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
     }
 
+
+
+    //TextEdit{
     TextArea {
         id: tweetTextArea
         anchors {
             top: header.bottom; left: parent.left; right: parent.right
-            bottomMargin: autoCompleter.height + 2 * buttonColumn.anchors.margins
+            bottomMargin: autoCompleter.height * 2  + 2 * buttonColumn.anchors.margins
             margins: constant.paddingMedium
         }
         platformInverted: settings.invertedTheme
@@ -100,7 +67,9 @@ Page {
         textFormat: Text.PlainText
         errorHighlight: charLeftText.text < 0 && type != "RT"
         font.pixelSize: constant.fontSizeXXLarge
+        //placeholderText: qsTr("Tap to write...")
         placeholderText: qsTr("Tap to write...")
+        //inputMethodHints: Qt.ImhLowercaseOnly
         text: placedText
         states: [
             State {
@@ -112,9 +81,9 @@ Page {
                 PropertyChanges { target: tweetTextArea; height: Math.max(implicitHeight, 120) }
             }
         ]
-        onTextChanged: internal.updateAutoCompleter()
+        //onTextChanged: internal.updateAutoCompleter()
 
-        Text {
+        TextInput {
             id: charLeftText
 
             property string shortenText: tweetTextArea.text.replace(/https?:\/\/\S+/g, __replaceLink)
@@ -130,6 +99,21 @@ Page {
             color: constant.colorMid
             text: 140 - shortenText.length - (addImageButton.checked ? constant.charReservedPerMedia : 0)
         }
+
+        //activeFocusOnPress: false
+        /*MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (!tweetTextArea.activeFocus) {
+                    tweetTextArea.forceActiveFocus()
+                    tweetTextArea.openSoftwareInputPanel();
+                } else {
+                    cancelButton.forceActiveFocus()
+                    tweetTextArea.closeSoftwareInputPanel();
+                }
+            }
+        } */
+
     }
 
     Loader {
@@ -172,7 +156,7 @@ Page {
         ListView {
             id: autoCompleter
             anchors { left: parent.left; right: parent.right }
-            height: 42
+            height: 120
             model: ListModel {}
             visible: inputContext.visible
             delegate: Button {
@@ -251,13 +235,14 @@ Page {
                 checked: imagePath != ""
                 onClicked: {
                     if (checked) imageDialogComponent.createObject(newTweetPage)
-                    else pageStack.push(Qt.resolvedUrl("SelectImagePage.qml"), {newTweetPage: newTweetPage})
+                    else filePicker.open() //pageStack.push(Qt.resolvedUrl("FileChooser.qml"), {newTweetPage: newTweetPage})
+                        //pageStack.push(Qt.resolvedUrl("SelectImagePage.qml"), {newTweetPage: newTweetPage})
                 }
             }
         }
     }
 
-    PageHeader {
+    PageHeaderWithButton {
         id: header
         headerIcon: type == "DM" ? "Image/create_message.svg" : "Image/edit.svg"
         headerText: {
@@ -270,21 +255,97 @@ Page {
             case "DM": return qsTr("DM to %1").arg("@" + screenName)
             }
         }
-        visible: !inputContext.visible
-        height: visible ? undefined : 0
-    }
+        buttonText: qsTr("Send") /*{
+            switch (type) {
+            case "New": return qsTr("Tweet")
+            case "Reply": return qsTr("Reply")
+            case "RT": return qsTr("Retweet")
+            case "DM": return qsTr("DM")
+            } } */
+        buttonWidth: 160
+        buttonEnabled: (tweetTextArea.text.length != 0 || addImageButton.checked)
+                       && ((settings.enableTwitLonger && !addImageButton.checked) || !tweetTextArea.errorHighlight)
+                       && !header.busy
+        onButtonClicked: {
+                // remove focus on text field for force commit pre-edit text
+                tweetTextArea.parent.focus = true;
+                if (type == "New" || type == "Reply") {
+                    if (addImageButton.checked) imageUploader.run()
+                    else {
+                        if (tweetTextArea.errorHighlight) internal.createUseTwitLongerDialog()
+                        else {
+                            Twitter.postStatus(tweetTextArea.text, tweetId ,latitude, longitude,
+                                               internal.postStatusOnSuccess, internal.commonOnFailure)
+                            header.busy = true
+                        }
+                    }
+                }
+                else if (type == "RT") {
+                    Twitter.postRetweet(tweetId, internal.postStatusOnSuccess, internal.commonOnFailure)
+                    header.busy = true
+                }
+                else if (type == "DM") {
+                    Twitter.postDirectMsg(tweetTextArea.text, screenName,
+                                          internal.postStatusOnSuccess, internal.commonOnFailure)
+                    header.busy = true
+                }
+            }
+        visible: true
+        height: constant.headerHeight + 10
+}
+        /*
+        ToolButton {
+            id: tweetButton
+            text: {
+                switch (type) {
+                case "New": return qsTr("Tweet")
+                case "Reply": return qsTr("Reply")
+                case "RT": return qsTr("Retweet")
+                case "DM": return qsTr("DM")
+                }
+            }
+            enabled: (tweetTextArea.text.length != 0 || addImageButton.checked)
+                     && ((settings.enableTwitLonger && !addImageButton.checked) || !tweetTextArea.errorHighlight)
+                     && !header.busy
+            platformInverted: settings.invertedTheme
+            onClicked: {
+                // remove focus on text field for force commit pre-edit text
+                tweetTextArea.parent.focus = true;
+                if (type == "New" || type == "Reply") {
+                    if (addImageButton.checked) imageUploader.run()
+                    else {
+                        if (tweetTextArea.errorHighlight) internal.createUseTwitLongerDialog()
+                        else {
+                            Twitter.postStatus(tweetTextArea.text, tweetId ,latitude, longitude,
+                                               internal.postStatusOnSuccess, internal.commonOnFailure)
+                            header.busy = true
+                        }
+                    }
+                }
+                else if (type == "RT") {
+                    Twitter.postRetweet(tweetId, internal.postStatusOnSuccess, internal.commonOnFailure)
+                    header.busy = true
+                }
+                else if (type == "DM") {
+                    Twitter.postDirectMsg(tweetTextArea.text, screenName,
+                                          internal.postStatusOnSuccess, internal.commonOnFailure)
+                    header.busy = true
+                }
+            }
+        }      */
+
 
     Component {
         id: locationDialogComponent
 
-        ContextMenu {
+        Menu {
             id: locationDialog
             property bool __isClosing: false
             platformInverted: settings.invertedTheme
 
             MenuLayout {
                 MenuItemWithIcon {
-                    iconSource: platformInverted ? "Image/location_mark_inverse.svg" : "Image/location_mark.svg"
+                    iconSource:  "Image/location_mark.svg"
                     text: qsTr("View location")
                     onClicked: {
                         preventTouch.enabled = true
@@ -292,7 +353,7 @@ Page {
                     }
                 }
                 MenuItemWithIcon {
-                    iconSource: platformInverted ? "image://theme/toolbar-delete_inverse" : "image://theme/toolbar-delete"
+                    iconSource:  "Image/delete_icon.png"
                     text: qsTr("Remove location")
                     onClicked: {
                         latitude = 0
@@ -312,19 +373,19 @@ Page {
     Component {
         id: imageDialogComponent
 
-        ContextMenu {
+        Menu {
             id: imageDialog
             property bool __isClosing: false
             platformInverted: settings.invertedTheme
 
             MenuLayout {
                 MenuItemWithIcon {
-                    iconSource: platformInverted ? "Image/photos_inverse.svg" : "Image/photos.svg"
+                    iconSource: "Image/photos.svg"
                     text: qsTr("View image")
                     onClicked: Qt.openUrlExternally(imageUrl)
                 }
                 MenuItemWithIcon {
-                    iconSource: platformInverted ? "image://theme/toolbar-delete_inverse" : "image://theme/toolbar-delete"
+                    iconSource: "Image/delete_icon.png"
                     text: qsTr("Remove image")
                     onClicked: {
                         imageUrl = ""
@@ -412,7 +473,7 @@ Page {
             autoCompleter.model.clear()
             var currentWord = getWordAt(tweetTextArea.text, tweetTextArea.cursorPosition)
             if (!/^(@|#)\w*$/.test(currentWord)) {
-                tweetTextArea.inputMethodHints = Qt.ImhNone
+                //tweetTextArea.inputMethodHints = Qt.ImhNone
                 return
             }
             var msg = {
@@ -422,7 +483,8 @@ Page {
                 hashtags: cache.hashtags
             }
             autoCompleterWorkerScript.sendMessage(msg)
-            tweetTextArea.inputMethodHints = Qt.ImhNoPredictiveText
+            //tweetTextArea.inputMethodHints = Qt.ImhNoPredictiveText
+            //tweetTextArea.inputMethodHints = Qt.ImhLowercaseOnly
         }
 
         /**
@@ -486,6 +548,18 @@ Note: The tweet content will be publicly visible even if your tweet is private."
                                      twitLongerOnSuccess, commonOnFailure)
                 header.busy = true
             })
+        }
+    }
+    FilePicker {
+        id: filePicker
+        type : FileType.Picture
+        title : "Select Picture"
+        mode: FilePicker.Picker
+        directories : ["/accounts/1000/shared"]
+        onFileSelected : {
+            console.log("FileSelected signal received : " + selectedFiles);
+            imageUrl = selectedFiles[0]
+            imagePath = selectedFiles[0]
         }
     }
 }

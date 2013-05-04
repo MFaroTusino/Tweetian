@@ -44,7 +44,7 @@ Page {
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource: "../Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             enabled: backButtonEnabled
             opacity: enabled ? 1 : 0.25

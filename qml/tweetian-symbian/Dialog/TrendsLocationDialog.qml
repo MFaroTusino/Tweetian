@@ -27,6 +27,7 @@ SelectionDialog {
     platformInverted: settings.invertedTheme
     titleText: qsTr("Trends Location")
     delegate: MenuItem {
+        textColor: "black"
         platformInverted: root.platformInverted
         text: model.name
         onClicked: {
@@ -41,8 +42,7 @@ SelectionDialog {
             }
             sourceSize { height: constant.graphicSizeSmall; width: constant.graphicSizeSmall }
             source: settings.trendsLocationWoeid === model.woeid.toString() ?
-                        (platformInverted ? "../Image/selection_indicator_inverse.svg"
-                                          : "../Image/selection_indicator.svg") : ""
+                        (platformInverted ? "../Image/selection_indicator_inverse.svg": "../Image/selection_indicator.svg") : ""
 
         }
     }

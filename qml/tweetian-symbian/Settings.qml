@@ -44,12 +44,15 @@ QtObject {
         trendsLocationWoeid = "1"
         imageUploadService = 0
         invertedTheme = false
+        hashtagsInReply = true
         enableTwitLonger = false
         largeFontSize = false
         translateLangName = "English"
         translateLangCode = "en"
         enableStreaming = false
-        autoRefreshInterval = 0
+        timelineRefreshFreq = 0
+        mentionsRefreshFreq = 0
+        directMsgRefreshFreq = 0
         pocketUsername = ""
         pocketPassword = ""
         instapaperToken = ""
@@ -74,8 +77,10 @@ QtObject {
     property int imageUploadService: 0
     onImageUploadServiceChanged: Database.setSetting({"imageUploadService": imageUploadService.toString()})
 
-    property bool invertedTheme: false
+    property bool invertedTheme: true
     onInvertedThemeChanged: Database.setSetting({"invertedTheme": invertedTheme.toString()})
+    property bool hashtagsInReply: true
+    onHashtagsInReplyChanged: Database.setSetting({"hashtagsInReply": hashtagsInReply.toString()})
     property bool enableTwitLonger: false
     onEnableTwitLongerChanged: Database.setSetting({"enableTwitLonger": enableTwitLonger.toString()})
     property bool largeFontSize: false
@@ -88,8 +93,12 @@ QtObject {
 
     property bool enableStreaming: false
     onEnableStreamingChanged: Database.setSetting({"enableStreaming": enableStreaming.toString()})
-    property int autoRefreshInterval: 0
-    onAutoRefreshIntervalChanged: Database.setSetting({"autoRefreshInterval": autoRefreshInterval.toString()})
+    property int timelineRefreshFreq: 0
+    onTimelineRefreshFreqChanged: Database.setSetting({"timelineRefreshFreq": timelineRefreshFreq.toString()})
+    property int mentionsRefreshFreq: 0
+    onMentionsRefreshFreqChanged: Database.setSetting({"mentionsRefreshFreq": mentionsRefreshFreq.toString()})
+    property int directMsgRefreshFreq: 0
+    onDirectMsgRefreshFreqChanged: Database.setSetting({"directMsgRefreshFreq": directMsgRefreshFreq.toString()})
 
     property string pocketUsername: ""
     onPocketUsernameChanged: Database.setSetting({"pocketUsername": pocketUsername})

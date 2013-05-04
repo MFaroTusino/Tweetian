@@ -39,7 +39,7 @@ Page {
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
@@ -56,9 +56,9 @@ Page {
         id: listPageListView
         anchors { top: pageHeader.bottom; bottom: parent.bottom; left: parent.left; right: parent.right }
         highlightRangeMode: ListView.StrictlyEnforceRange
-        snapMode: ListView.SnapOneItem
+        //snapMode: ListView.SnapOneItem
         orientation: ListView.Horizontal
-        boundsBehavior: Flickable.StopAtBounds
+        //boundsBehavior: Flickable.StopAtBounds
         model: VisualItemModel {
             ListInfo { id: listInfo }
             ListTimeline { id: listTimeline }

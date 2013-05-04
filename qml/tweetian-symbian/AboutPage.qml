@@ -26,7 +26,7 @@ Page {
     tools: ToolBarLayout {
         ToolButtonWithTip {
             id: backButton
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
@@ -90,6 +90,14 @@ smartphone. Tweetian is open source and licensed under GPL v3.")
                 imageSource: "Image/DicksonBetaDP.png"
                 text: "@DicksonBeta"
                 onClicked: pageStack.push(Qt.resolvedUrl("UserPage.qml"), {screenName: "DicksonBeta"})
+            }
+
+            SectionHeader { text: qsTr("Ported to BB10 by") }
+
+            AboutPageItem {
+                imageSource: "Image/logo-bb4.png"
+                text: "@bb4software"
+                onClicked: pageStack.push(Qt.resolvedUrl("UserPage.qml"), {screenName: "bb4software"})
             }
 
             SectionHeader { text: qsTr("Powered By") }

@@ -25,19 +25,22 @@ import UserStream 1.0
 import "MainPageCom/UserStream.js" as StreamScript
 import "Utils/Parser.js" as Parser
 
+
 Page {
     id: mainPage
 
     property Item timeline: timeline
     property Item mentions: mentions
     property Item directMsg: directMsg
+    property Item userpage : userpage
 
     onStatusChanged: if (status === PageStatus.Activating) loadingRect.visible = false
 
+    /*
     tools: ToolBarLayout {
         ToolButtonWithTip {
             property Component __exitDialog: null
-            iconSource: platformInverted ? "Image/close_stop_inverse.svg" : "Image/close_stop.svg"
+            iconSource: platformInverted ?  "Image/close_stop.svg" : "Image/close_stop_inverse.svg"
             toolTipText: qsTr("Exit")
             onClicked: {
                 if (!__exitDialog) __exitDialog = Qt.createComponent("Dialog/ExitDialog.qml")
@@ -45,17 +48,17 @@ Page {
             }
         }
         ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/edit_inverse.svg" : "Image/edit.svg"
+            iconSource: platformInverted ? "Image/edit.svg": "Image/edit_inverse.svg"
             toolTipText: qsTr("New Tweet")
             onClicked: pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), {type: "New"})
         }
         ToolButtonWithTip {
-            iconSource: "toolbar-search"
+            iconSource: platformInverted ? "Image/ic_fr_search.png": "Image/ic_fr_search_inverse.png"
             toolTipText: qsTr("Trends & Search")
             onClicked: pageStack.push(Qt.resolvedUrl("TrendsPage.qml"))
         }
         ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/contacts_inverse.svg" : "Image/contacts.svg"
+            iconSource: platformInverted ? "Image/contacts.svg" : "Image/contacts_inverse.svg"
             toolTipText: qsTr("My profile")
             onClicked: pageStack.push(Qt.resolvedUrl("UserPage.qml"), {screenName: settings.userScreenName})
         }
@@ -64,7 +67,7 @@ Page {
             toolTipText: qsTr("Menu")
             onClicked: mainMenu.open()
         }
-    }
+    } */
 
     Menu {
         id: mainMenu
@@ -98,17 +101,37 @@ Page {
         function moveToColumn(index) {
             columnMovingAnimation.to = (index * width) + __contentXOffset
             columnMovingAnimation.restart()
+
         }
 
-        anchors { top: mainPageHeader.bottom; left: parent.left; right: parent.right; bottom: parent.bottom }
+        //anchors { top: mainPageHeader.bottom; left: parent.left; right: parent.right; bottom: parent.bottom }
+        anchors { top: mainPageHeader.bottom; left: parent.left; right: parent.right; bottom: parent.bottom  }
         highlightRangeMode: ListView.StrictlyEnforceRange
-        snapMode: ListView.SnapOneItem
+        //snapMode: ListView.SnapOneItem
+        interactive: false
+        snapMode: ListView.NoSnap
         orientation: ListView.Horizontal
-        boundsBehavior: Flickable.StopAtBounds
+        //boundsBehavior: Flickable.StopAtBounds
         model: VisualItemModel {
             TweetListView { id: timeline; type: "Timeline" }
             TweetListView { id: mentions; type: "Mentions" }
             DirectMessage { id: directMsg }
+            /*Item{
+                id: userpage
+                implicitHeight: mainView.height; implicitWidth: mainView.width
+                property int unreadCount: 0
+                Loader {
+                    id: userPageLoader
+                    source: "UserItem.qml"
+                    onLoaded: {
+                        console.debug("The propertiess")
+                        userPageLoader.item.screenName = "iLaliux"
+                        console.debug(userPageLoader.item.screenName)
+                        console.debug("The propertiess 2")
+                    }
+                }
+            } */
+            UserItem {id: userpage; screenName: settings.userScreenName}
         }
         onWidthChanged: __contentXOffset = contentX - (currentIndex * width)
 
@@ -132,17 +155,26 @@ Page {
                 timeline.initialize()
                 mentions.initialize()
                 directMsg.initialize()
+
                 StreamScript.initialize()
                 StreamScript.saveUserInfo()
             }
         }
     }
 
-    TabPageHeader {
+    TweetPageHeader {
+        id: header
+        headerIcon: "Image/twitter-bird-dark.png"
+        headerText: qsTr("Tweetian")
+        onClicked: pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), {type: "New"})
+    }
+
+    TabPageHeader{
+        anchors{  top: header.bottom }
         id: mainPageHeader
         listView: mainView
         iconArray: [Qt.resolvedUrl("Image/home.svg"), Qt.resolvedUrl("Image/mail.svg"),
-            Qt.resolvedUrl("Image/inbox.svg")]
+            Qt.resolvedUrl("Image/inbox.svg"),  Qt.resolvedUrl("Image/contacts.svg")]
     }
 
     UserStream {

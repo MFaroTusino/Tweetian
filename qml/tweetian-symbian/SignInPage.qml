@@ -27,14 +27,6 @@ Page {
     property string tokenTempo: ""
     property string tokenSecretTempo: ""
 
-    tools: ToolBarLayout {
-        ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/close_stop_inverse.svg" : "Image/close_stop.svg"
-            toolTipText: qsTr("Exit")
-            onClicked: Qt.quit()
-        }
-    }
-
     Flickable {
         id: flickable
         anchors { top: header.bottom; left: parent.left; right: parent.right; bottom: parent.bottom }
@@ -44,7 +36,7 @@ Page {
             id: mainColumn
             anchors { left: parent.left; right: parent.right; top: parent.top; topMargin: constant.paddingMedium }
             height: childrenRect.height
-            spacing: constant.paddingMedium
+            spacing: constant.paddingSmall
 
             Text {
                 anchors { left: parent.left; right: parent.right }
@@ -54,14 +46,62 @@ Page {
                 text: qsTr("Welcome to Tweetian")
             }
 
-            Text {
+            Item {
+                id: pinCodeTextFieldWrapper
                 anchors { left: parent.left; right: parent.right }
-                font.pixelSize: constant.fontSizeMedium
-                color: constant.colorLight
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-                text: qsTr("To use Tweetian, you must sign in to your Twitter account first. \
-Click the button below will launch an external web browser for you to sign in to your Twitter account.")
+                height: pinCodeTextFieldRow1.height + 2 * constant.paddingXLarge
+
+                Column {
+                    id: pinCodeTextFieldRow1
+                    anchors.centerIn: parent
+                    width: childrenRect.width; height: loginTextField.height
+                    spacing: constant.paddingLarge
+
+                    Text {
+                        font.pixelSize: constant.fontSizeMedium
+                        color: constant.colorLight
+                        text: "User:"
+                    }
+
+                    TextField {
+                        id: loginTextField
+                        platformInverted: settings.invertedTheme
+                        width: pinCodeTextFieldWrapper.width * 0.7
+                        enabled: !header.busy
+                    }
+                }
+            }
+            Item {
+                id: pinCodeTextFieldWrapper2
+                anchors { left: parent.left; right: parent.right }
+                height: pinCodeTextFieldRow1.height + 2 * constant.paddingXLarge
+
+                Column {
+                    id: pinCodeTextFieldRow2
+                    anchors.centerIn: parent
+                    width: childrenRect.width; height: loginTextField.height
+                    spacing: constant.paddingLarge
+
+                    Text {
+                        font.pixelSize: constant.fontSizeMedium
+                        color: constant.colorLight
+                        text: "Password:"
+                    }
+
+                    TextField {
+                        id: passwordTextField
+                        platformInverted: settings.invertedTheme
+                        width: pinCodeTextFieldWrapper.width * 0.7
+                        enabled: !header.busy
+                        echoMode: TextInput.Password
+                    }
+                }
+            }
+
+            Item{
+                id: spacer
+                width: parent.width
+                height: 60
             }
 
             Item {
@@ -75,55 +115,10 @@ Click the button below will launch an external web browser for you to sign in to
                     width: Math.max(implicitWidth, mainColumn.width * 0.7)
                     platformInverted: settings.invertedTheme
                     text: qsTr("Sign In")
+                    font.pixelSize: {constant.fontSizeMedium}
                     enabled: !header.busy
-                    onClicked: internal.signInButtonClicked()
+                    onClicked: internal.signIn2ButtonClicked();
                 }
-            }
-
-            Text {
-                anchors { left: parent.left; right: parent.right }
-                font.pixelSize: constant.fontSizeMedium
-                color: constant.colorLight
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-                text: qsTr("After sign in, a PIN code will display. Enter the PIN code in the text field \
-below and click done.")
-            }
-
-            Item {
-                id: pinCodeTextFieldWrapper
-                anchors { left: parent.left; right: parent.right }
-                height: pinCodeTextFieldRow.height + 2 * constant.paddingXLarge
-
-                Row {
-                    id: pinCodeTextFieldRow
-                    anchors.centerIn: parent
-                    width: childrenRect.width; height: pinCodeTextField.height
-                    spacing: constant.paddingLarge
-
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        font.pixelSize: constant.fontSizeMedium
-                        color: constant.colorLight
-                        text: "PIN:"
-                    }
-
-                    TextField {
-                        id: pinCodeTextField
-                        platformInverted: settings.invertedTheme
-                        width: pinCodeTextFieldWrapper.width * 0.7
-                        enabled: !header.busy
-                        inputMethodHints: Qt.ImhDigitsOnly
-                    }
-                }
-            }
-
-            Button {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: Math.max(implicitWidth, parent.width * 0.7)
-                enabled: pinCodeTextField.text != "" && !header.busy
-                text: qsTr("Done")
-                onClicked: internal.doneButtonClicked()
             }
         }
     }
@@ -136,8 +131,31 @@ below and click done.")
         headerIcon: "Image/sign_in.svg"
     }
 
+    WorkerScript {
+           id: loginParser
+           source: "WorkerScript/LoginParser.js"
+           onMessage: internal.onParseComplete(messageObject);
+       }
+
+
+
     QtObject {
         id: internal
+
+
+        function onParseComplete(msg) {
+
+                  switch (msg.type) {
+                  case "login":
+                      login(msg.usr, msg.pwd);
+                  }
+              }
+
+
+             function login(usr, pwd) {
+                 console.log("login() ");
+
+             }
 
         function signInButtonClicked() {
             Twitter.postRequestToken(function(token, tokenSecret) {
@@ -159,8 +177,68 @@ Make sure the time/date of your phone is set correctly."))
             header.busy = true;
         }
 
-        function doneButtonClicked() {
-            Twitter.postAccessToken(tokenTempo, tokenSecretTempo, pinCodeTextField.text,
+        function signIn2ButtonClicked() {
+            Twitter.postRequestToken(function(token, tokenSecret) {
+                tokenTempo = token;
+                tokenSecretTempo = tokenSecret;
+
+                console.log("token: " + token);
+                console.log("secret: " + tokenSecret);
+
+                internal.authorize(tokenTempo);
+
+                header.busy = false;
+             }, function(status, statusText) {
+                 if (status === 401)
+                     infoBanner.showText(qsTr("Error: Unable to authorize with Twitter. \
+Make sure the time/date of your phone is set correctly."))
+                 else
+                     infoBanner.showHttpError(status, statusText);
+                 header.busy = false;
+             });
+            header.busy = true;
+        }
+
+        function authorize(token){
+            console.log("auth 1");
+            Twitter.postAuthorizeToken(token,
+                function (authToken){
+                    console.log("token: " + token);
+                    console.log("authorization token: " + authToken);
+
+                    internal.handlePIN(token, authToken);
+                },
+
+                function(status2, statusText2){
+                    if (status2 === 401)
+                        infoBanner.showText(qsTr("Error: Unable to authorize with Twitter."));
+                    else
+                        infoBanner.showHttpError(status2, statusText2);
+                });
+
+        }
+
+        function handlePIN(token, authenticityToken){
+            Twitter.postHandlePIN(token,authenticityToken, loginTextField.text, passwordTextField.text,
+                function (PIN){
+                    console.log("token: " + token);
+                    console.log("authenticityToken : " + authenticityToken);
+
+                    console.log("PIN: " + PIN);
+
+                    internal.getAccessToken(PIN)
+                },
+
+                function(status2, statusText2){
+                    if (status2 === 401)
+                        infoBanner.showText(qsTr("Error: Unable to authorize with Twitter."));
+                    else
+                        infoBanner.showHttpError(status2, statusText2);
+                });
+        }
+
+        function getAccessToken(PIN) {
+            Twitter.postAccessToken(tokenTempo, tokenSecretTempo, PIN,
             function (token, tokenSecret, screenName) {
                 settings.oauthToken = token
                 settings.oauthTokenSecret = tokenSecret

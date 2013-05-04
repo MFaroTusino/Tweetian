@@ -20,7 +20,7 @@ import QtQuick 1.1
 import com.nokia.symbian 1.1
 import "../Component"
 
-ContextMenu {
+Menu {
     id: root
 
     property string link
@@ -40,13 +40,13 @@ ContextMenu {
             text: link
             font.italic: true
             font.pixelSize: constant.fontSizeMedium
-            color: "LightSeaGreen"
+            color: "#06BDF7"
             elide: Text.ElideRight
             maximumLineCount: 2
             wrapMode: Text.WrapAnywhere
         }
         MenuItemWithIcon {
-            iconSource: platformInverted ? "../Image/internet_inverse.svg" : "../Image/internet.svg"
+            iconSource: platformInverted ? "../Image/internet.svg": "../Image/internet_inverse.svg"
             text: qsTr("Open link in web browser")
             platformInverted: root.platformInverted
             onClicked: {
@@ -55,7 +55,7 @@ ContextMenu {
             }
         }
         MenuItemWithIcon {
-            iconSource: "image://theme/qtg_toolbar_copy" + (platformInverted ? "_inverse" : "" )
+            iconSource: "image://theme/qtg_toolbar_copy" + (platformInverted ? "":"_inverse"  )
             text: qsTr("Copy link")
             platformInverted: root.platformInverted
             onClicked: {
@@ -65,13 +65,13 @@ ContextMenu {
         }
         MenuItemWithIcon {
             visible: showAddPageServices
-            iconSource: platformInverted ? "../Image/web_page_inverse.svg" : "../Image/web_page.svg"
+            iconSource: platformInverted ? "../Image/web_page.svg" : "../Image/web_page_inverse.svg"
             text: qsTr("Send to Pocket")
             onClicked: addToPocketClicked(link)
         }
         MenuItemWithIcon {
             visible: showAddPageServices
-            iconSource: platformInverted ? "../Image/web_page_inverse.svg" : "../Image/web_page.svg"
+            iconSource: platformInverted ? "../Image/web_page.svg" : "../Image/web_page_inverse.svg"
             text: qsTr("Send to Instapaper")
             onClicked: addToInstapaperClicked(link)
         }

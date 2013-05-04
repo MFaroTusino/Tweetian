@@ -23,7 +23,7 @@ Item {
 
     property int value: 0
 
-    height: valueText.paintedHeight + 2 * constant.paddingSmall
+    height: valueText.paintedHeight + 2 * constant.paddingXSmall
     width: Math.max(height, valueText.paintedWidth + 2 * constant.paddingMedium)
 
     BorderImage {

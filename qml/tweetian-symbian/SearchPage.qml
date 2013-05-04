@@ -30,14 +30,14 @@ Page {
     property bool isSavedSearch: false
     property string savedSearchId: ""
 
-    onSearchStringChanged: if (!searchListView.currentItem.firstTimeLoaded) searchListView.currentItem.refresh("all")
+    onSearchStringChanged: if (searchListView.currentItem != null && !searchListView.currentItem.firstTimeLoaded) searchListView.currentItem.refresh("all")
 
     Component.onCompleted: if (searchString && (!isSavedSearch || !savedSearchId)) internal.checkIsSavedSearch()
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
             id: backButton
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
@@ -64,9 +64,9 @@ Page {
             left: parent.left; right: parent.right
         }
         highlightRangeMode: ListView.StrictlyEnforceRange
-        snapMode: ListView.SnapOneItem
+        //snapMode: ListView.SnapOneItem
         orientation: ListView.Horizontal
-        boundsBehavior: Flickable.StopAtBounds
+        //boundsBehavior: Flickable.StopAtBounds
         model: VisualItemModel {
             TweetSearchColumn {}
             UserSearchColumn {}
@@ -187,6 +187,7 @@ Page {
             savedSearchId = ""
             loadingRect.visible = false
             infoBanner.showText(qsTr("The saved search %1 is removed successfully").arg("\""+data.name+"\""))
+            pageStack.pop();
         }
 
         function removeSearchOnFailure(status, statusText) {

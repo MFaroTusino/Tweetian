@@ -18,7 +18,7 @@
 
 import QtQuick 1.1
 import com.nokia.symbian 1.1
-import QtMobility.location 1.2
+import QtMobilitySubset.location 1.1
 import "Utils/Calculations.js" as Calculate
 import "Component"
 
@@ -30,12 +30,12 @@ Page {
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource:  "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
         ToolButtonWithTip {
-            iconSource: "toolbar-menu"
+            iconSource: "Image/icon_menu.png"
             toolTipText: qsTr("Menu")
             onClicked: menu.open()
         }

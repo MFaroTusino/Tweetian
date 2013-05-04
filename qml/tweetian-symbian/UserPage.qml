@@ -59,31 +59,21 @@ Page {
     }
 
     tools: ToolBarLayout {
+        visible: (screenName !== settings.userScreenName)?true:false
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource:"Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
-        ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/mail_inverse.svg" : "Image/mail.svg"
+        /*ToolButtonWithTip {
+            iconSource: "Image/mail.svg"
             enabled: screenName !== settings.userScreenName
             toolTipText: qsTr("Mentions")
             onClicked: pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), {type: "New", placedText: "@"+screenName+" "})
-        }
+        } */
+
         ToolButtonWithTip {
-            iconSource: platformInverted ? "Image/create_message_inverse.svg" : "Image/create_message.svg"
-            enabled: screenName !== settings.userScreenName
-            toolTipText: qsTr("Direct Messages")
-            onClicked: pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), {type: "DM", screenName: screenName})
-        }
-        ToolButtonWithTip {
-            iconSource: "toolbar-refresh"
-            enabled: !loadingRect.visible
-            toolTipText: qsTr("Refresh")
-            onClicked: internal.refresh()
-        }
-        ToolButtonWithTip {
-            iconSource: "toolbar-menu"
+            iconSource: "Image/icon_menu.png"
             toolTipText: qsTr("Menu")
             onClicked: userPageMenu.open()
         }
@@ -107,12 +97,24 @@ Page {
                 platformInverted: userPageMenu.platformInverted
                 onClicked: internal.createReportSpamDialog()
             }
+            MenuItem {
+                //iconSource:  "Image/create_message.svg"
+                enabled: screenName !== settings.userScreenName
+                text: qsTr("Direct Messages")
+                onClicked: pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), {type: "DM", screenName: screenName})
+            }
+            MenuItemWithIcon{
+                iconSource: "Image/icon_refresh.png"
+                enabled: !loadingRect.visible
+                text: qsTr("Refresh")
+                onClicked: internal.refresh()
+            }
         }
     }
 
     Flickable {
         id: userFlickable
-        anchors.fill: parent
+        anchors { top: header.bottom; left: parent.left; right: parent.right; bottom: parent.bottom }
         flickableDirection: Flickable.VerticalFlick
         contentHeight: userColumn.height
 
@@ -294,6 +296,13 @@ Page {
     }
 
     ScrollDecorator { platformInverted: settings.invertedTheme; flickableItem: userFlickable }
+
+    TweetPageHeader {
+        id: header
+        headerIcon: "Image/contacts.svg"
+        headerText: qsTr("User")
+        onClicked: pageStack.push(Qt.resolvedUrl("NewTweetPage.qml"), {type: "New", placedText: "@"+screenName+" "})
+    }
 
     QtObject {
         id: internal

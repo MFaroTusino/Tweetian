@@ -20,7 +20,7 @@ import QtQuick 1.1
 import com.nokia.symbian 1.1
 import "../Component"
 
-ContextMenu {
+Menu {
     id: root
 
     property string screenName
@@ -34,7 +34,7 @@ ContextMenu {
     MenuLayout {
         id: menuLayout
         MenuItemWithIcon {
-            iconSource: "image://theme/qtg_toolbar_copy" + (platformInverted ? "_inverse" : "" )
+            iconSource: "../Image/icon_copy.png"
             text: qsTr("Copy DM")
             onClicked: {
                 // TODO: Remove html for links
@@ -43,13 +43,13 @@ ContextMenu {
             }
         }
         MenuItemWithIcon {
-            iconSource: platformInverted ? "image://theme/toolbar-delete_inverse" : "image://theme/toolbar-delete"
+            iconSource: "../Image/icon_delete.png"
             text: qsTr("Delete")
             onClicked: internal.createDeleteDMDialog(id)
         }
         MenuItemWithIcon {
-            iconSource: platformInverted ? "../Image/contacts_inverse.svg" : "../Image/contacts.svg"
-            text: qsTr("%1 Profile").arg("<font color=\"LightSeaGreen\">@" + screenName + "</font>")
+            iconSource: "../Image/contacts.svg"
+            text: qsTr("%1 Profile").arg("<font color=\"#06BDF7\">@" + screenName + "</font>")
             visible: screenName != ""
             onClicked: pageStack.push(Qt.resolvedUrl("../UserPage.qml"), {screenName: screenName})
         }
@@ -58,7 +58,7 @@ ContextMenu {
 
             MenuItemWithIcon {
                 width: menuLayout.width
-                iconSource: platformInverted ? "../Image/internet_inverse.svg" : "../Image/internet.svg"
+                iconSource: "../Image/internet.svg"
                 text: modelData.substring(modelData.indexOf('://') + 3)
                 onClicked: dialog.createOpenLinkDialog(modelData)
             }

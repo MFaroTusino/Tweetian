@@ -43,7 +43,7 @@ var PIC_SERVICES = [
         }
     },
     {
-        regexp: /http:\/\/instagram.com\/p\/[^\/]+\//ig,
+        regexp: /http:\/\/instagr.am\/p\/[^\/]+\//ig,
         getPicUrl: function(link) {
             var url = {
                 full: link + "media/?size=l",
@@ -135,6 +135,15 @@ function createPicThumb() {
     if (flickrLinks !== null) {
         flickrLinks.forEach(function(url) {
             Flickr.getSizes(constant, url, function(full, thumb, link) {
+                thumbnailModel.append({type: "image", full: full, thumb: thumb, link: link})
+            })
+        })
+    }
+
+    var gagLinks = tweet.richText.match(NineGag.NINEGAG_URL_REGEXP);
+    if (gagLinks !== null) {
+        gagLinks.forEach(function(url) {
+            NineGag.getImageUrl(constant, url, function(full, thumb, link) {
                 thumbnailModel.append({type: "image", full: full, thumb: thumb, link: link})
             })
         })
@@ -247,6 +256,13 @@ function contructReplyText() {
             replyText += mentions + " "
     })
 
+    // check for hashtag in the tweet if hashtagsInReply is enabled
+    if (settings.hashtagsInReply) {
+        var hashtagsArray = tweet.richText.match(/href="#[^"\s]+/g) || []
+        hashtagsArray.forEach(function(hashtag) {
+            replyText += hashtag.substring(6) + " "
+        })
+    }
     return replyText
 }
 

@@ -36,23 +36,10 @@ Page {
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource:"../Image/ic_back_button.png"
             enabled: !internal.workerScriptRunning
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
-        }
-        ToolButtonWithTip {
-            iconSource: platformInverted ? "../Image/edit_inverse.svg" : "../Image/edit.svg"
-            toolTipText: qsTr("New DM")
-            onClicked: pageStack.push(Qt.resolvedUrl("../NewTweetPage.qml"),
-                                      {type: "DM", screenName: screenName})
-        }
-        ToolButtonWithTip {
-            iconSource: "toolbar-refresh"
-            toolTipText: qsTr("Refresh")
-            opacity: enabled ? 1 : 0.25
-            enabled: !userStream.connected
-            onClicked: mainPage.directMsg.refresh("newer")
         }
     }
 
@@ -67,12 +54,20 @@ Page {
 
     ScrollDecorator { platformInverted: settings.invertedTheme; flickableItem: dMConversationView }
 
+    /*
     PageHeader {
         id: header
         headerText: qsTr("DM: %1").arg("@" + screenName)
         headerIcon: "../Image/inbox.svg"
         busy: internal.workerScriptRunning || mainPage.directMsg.busy
         onClicked: dMConversationView.positionViewAtBeginning()
+    } */
+    TweetPageHeader {
+        id: header
+        headerIcon: "../Image/inbox.svg"
+        headerText: qsTr("DM: %1").arg("@" + screenName)
+        busy: internal.workerScriptRunning || mainPage.directMsg.busy
+        onClicked: pageStack.push(Qt.resolvedUrl("../NewTweetPage.qml"),  {type: "DM", screenName: screenName})
     }
 
     WorkerScript {

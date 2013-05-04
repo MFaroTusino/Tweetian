@@ -20,29 +20,38 @@ import QtQuick 1.1
 import com.nokia.symbian 1.1
 import "../Component"
 
-ContextMenu {
+Menu {
     id: root
 
     property variant model
     property bool __isClosing: false
 
+    function getAllHashtags(text) {
+        if (!settings.hashtagsInReply) return ""
+        var hashtags = ""
+        var hashtagsArray = text.match(/href="#[^"\s]+/g)
+        if (hashtagsArray != null)
+            for (var i=0; i<hashtagsArray.length; i++) hashtags += hashtagsArray[i].substring(6) + " "
+
+        return hashtags
+    }
+
     platformInverted: settings.invertedTheme
 
     MenuLayout {
         MenuItemWithIcon {
-            iconSource: platformInverted ? "../Image/reply_inverse.png" : "../Image/reply.png"
+            iconSource: platformInverted ? "../Image/reply.png" : "../Image/reply_inverse.png"
             text: qsTr("Reply")
             onClicked: {
                 var prop = {
                     type: "Reply",
                     tweetId: model.id,
-                    placedText: "@" + model.retweetScreenName + " "
-                }
+                    placedText: "@" + model.retweetScreenName + " " + getAllHashtags(model.richText)}
                 pageStack.push(Qt.resolvedUrl("../NewTweetPage.qml"), prop)
             }
         }
         MenuItemWithIcon {
-            iconSource: platformInverted ? "../Image/retweet_inverse.png" : "../Image/retweet.png"
+            iconSource: platformInverted ? "../Image/retweet.png" : "../Image/retweet_inverse.png"
             text: qsTr("Retweet")
             onClicked: {
                 var text = "RT @" + model.retweetScreenName + ": ";
@@ -52,13 +61,13 @@ ContextMenu {
             }
         }
         MenuItemWithIcon {
-            iconSource: platformInverted ? "../Image/contacts_inverse.svg" : "../Image/contacts.svg"
-            text: qsTr("%1 Profile").arg("<font color=\"LightSeaGreen\">@" + model.retweetScreenName + "</font>")
+            iconSource: platformInverted ? "../Image/contacts.svg": "../Image/contacts_inverse.svg"
+            text: qsTr("%1 Profile").arg("<font color=\"#06BDF7\">@" + model.retweetScreenName + "</font>")
             onClicked: pageStack.push(Qt.resolvedUrl("../UserPage.qml"), { screenName: model.retweetScreenName })
         }
         MenuItemWithIcon {
-            iconSource: platformInverted ? "../Image/contacts_inverse.svg" : "../Image/contacts.svg"
-            text: qsTr("%1 Profile").arg("<font color=\"LightSeaGreen\">@" + model.screenName + "</font>")
+            iconSource: platformInverted ? "../Image/contacts.svg" : "../Image/contacts_inverse.svg"
+            text: qsTr("%1 Profile").arg("<font color=\"#06BDF7\">@" + model.screenName + "</font>")
             visible: model.isRetweet
             onClicked: pageStack.push(Qt.resolvedUrl("../UserPage.qml"), { screenName: model.screenName })
         }

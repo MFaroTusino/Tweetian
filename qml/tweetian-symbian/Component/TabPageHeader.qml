@@ -32,23 +32,13 @@ Item {
     property ListView listView: null
     property variant iconArray: []
 
-    anchors { top: parent.top; left: parent.left; right: parent.right }
-    height: constant.headerHeight
+    anchors {left: parent.left; right: parent.right }
+    height: constant.headerHeight + constant.headerHeight * 0.2
 
     Image {
         id: background
         anchors.fill: parent
-        source: "../Image/header.png"
-    }
-
-    Image {
-        anchors { top: parent.top; left: parent.left }
-        source: "../Image/meegoTLCorner.png"
-    }
-
-    Image {
-        anchors { top: parent.top; right: parent.right }
-        source: "../Image/meegoTRCorner.png"
+        source: "../Image/toolbar_background.png"
     }
 
     Row {
@@ -71,7 +61,7 @@ Item {
                 CountBubble {
                     anchors {
                         top: parent.top; topMargin: constant.paddingSmall
-                        left: icon.right; leftMargin: -constant.paddingMedium
+                        left: icon.right; leftMargin: constant.paddingSmall * 0.4
                     }
                     visible: value > 0
                     value: listView.model.children[index].unreadCount
@@ -117,8 +107,8 @@ Item {
                     anchors.fill: parent
                     onClicked: listView.currentIndex === index ? listView.currentItem.positionAtTop()
                                                                : listView.moveToColumn(index)
-                    onPressed: basicHapticEffect.play()
-                    onReleased: basicHapticEffect.play()
+                    //onPressed: basicHapticEffect.play() 
+                    //onReleased: basicHapticEffect.play() 
                 }
             }
         }
@@ -127,7 +117,8 @@ Item {
     Rectangle {
         id: currentSectionIndicator
         anchors.bottom: parent.bottom
-        color: "white"
+        //color: (platformInverted)? "#00a8df" : "white"
+        color: "#00a8df"
         height: constant.paddingSmall
         width: listView.visibleArea.widthRatio * parent.width
         x: listView.visibleArea.xPosition * parent.width

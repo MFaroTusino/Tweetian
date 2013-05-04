@@ -29,6 +29,7 @@ var USER_AGENT
 // OAUTH
 var REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"
 var ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token"
+var AUTHORIZE_TOKEN_URL = "https://api.twitter.com/oauth/authorize"
 
 // GET
 var GET_TIMELIME_URL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
@@ -127,7 +128,8 @@ OAuthRequest.prototype.sendRequest = function(onSuccess, onFailure) {
     }
 
     request.setRequestHeader("Authorization", authorizationHeader)
-    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    //request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
     request.setRequestHeader("User-Agent", USER_AGENT)
     request.send(encoded)
 }
@@ -336,7 +338,7 @@ function postRequestToken(onSuccess, onFailure) {
     }
     var message = {
         action: REQUEST_TOKEN_URL,
-        method: "POST",
+        method: "GET",
         parameters: [["oauth_callback", "oob"]]
     }
     OAuth.completeRequest(message, accessor)
@@ -348,6 +350,7 @@ function postRequestToken(onSuccess, onFailure) {
         if (request.readyState === XMLHttpRequest.DONE) {
             if (request.status === 200) {
                 var token, tokenSecret, callbackConfirmed
+                console.log("RESPONSE request token: " + request.responseText);
                 var tokenArray = request.responseText.split('&')
                 for (var i=0; i<tokenArray.length; i++) {
                     if (tokenArray[i].indexOf("oauth_token=") == 0) token = tokenArray[i].substring(12)
@@ -364,6 +367,132 @@ function postRequestToken(onSuccess, onFailure) {
     request.setRequestHeader("User-Agent", USER_AGENT)
     request.send()
 }
+
+
+function postAuthorizeToken(oauthToken, onSuccess, onFailure) {
+
+    var accessor = {
+        consumerKey: OAUTH_CONSUMER_KEY,
+        consumerSecret: OAUTH_CONSUMER_SECRET
+    }
+    var message = {
+        action: AUTHORIZE_TOKEN_URL + "?oauth_token=" + oauthToken ,
+        method: "GET",
+        parameters: []
+    }
+    OAuth.completeRequest(message, accessor)
+    var authorizationHeader = OAuth.getAuthorizationHeader(message.action, message.parameters)
+    var request = new XMLHttpRequest()
+
+    //console.log("Auth req ok");
+
+    request.open(message.method, message.action);
+
+    //console.log("Open req ok");
+
+    request.onreadystatechange = function() {
+        if (request.readyState === XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                var token, tokenSecret, callbackConfirmed, authTokenString
+                console.log("RESPONSE authorize token: " + request.responseText);
+
+                var  OAUTHLIB_AUTHENTICITY_TOKEN_TWITTER_RESP_KEY = "authenticity_token\" type=\"hidden\" value=\"";
+                var OAUTHLIB_TOKEN_END_TAG_TWITTER_RESP = "\" />";
+
+                var nposStart = request.responseText.indexOf(OAUTHLIB_AUTHENTICITY_TOKEN_TWITTER_RESP_KEY);
+
+                if(nposStart > 0){
+                    nposStart += OAUTHLIB_AUTHENTICITY_TOKEN_TWITTER_RESP_KEY.length;
+
+                    authTokenString = request.responseText.substring(nposStart);
+
+                    var nposEnd = authTokenString.indexOf(OAUTHLIB_TOKEN_END_TAG_TWITTER_RESP);
+
+                    if(nposEnd > 0){
+                        authTokenString = authTokenString.substring(0, nposEnd)
+
+                        console.log("authorization token: " + authTokenString);
+                    }
+                }
+
+
+                onSuccess( authTokenString)
+            }
+            else onFailure(request.status, request.statusText)
+        }else{
+            /* console.log("ReadyState: ");
+            console.log(request.readyState);
+            if (request.readyState === XMLHttpRequest.LOADING) {
+                console.log("PArtial text: " + request.responseText);
+            } */
+        }
+    }
+
+    request.setRequestHeader("Authorization", authorizationHeader)
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    request.setRequestHeader("User-Agent", USER_AGENT)
+    request.send()
+
+}
+
+function postHandlePIN(token, authenticityToken, usr, pwd, onSuccess, onFailure) {
+    var accessor = {
+        consumerKey: OAUTH_CONSUMER_KEY,
+        consumerSecret: OAUTH_CONSUMER_SECRET /*,
+        token: token,
+        tokenSecret: tokenSecret */
+    }
+    var message = {
+        action: AUTHORIZE_TOKEN_URL,
+        method: "POST",
+        parameters: [["oauth_token", token], ["authenticity_token", authenticityToken], ["session[username_or_email]", usr], ["session[password]", pwd]]
+    }
+
+
+    var body = OAuth.formEncode(message.parameters)
+    OAuth.completeRequest(message, accessor)
+    var authorizationHeader = OAuth.getAuthorizationHeader(message.action, message.parameters)
+    var request = new XMLHttpRequest()
+    request.open(message.method, message.action)
+
+    request.onreadystatechange = function() {
+        if (request.readyState === XMLHttpRequest.DONE) {
+            if (request.status === 200) {
+                var token, tokenSecret, screenName, pinString
+
+                console.log("RESPONSE Access token: " + request.responseText);
+
+                var OAUTHLIB_PIN_TWITTER_RESP_KEY = "code-desc\"><code>";
+                var OAUTHLIB_PIN_END_TAG_TWITTER_RESP = "</code>";
+
+                var nPosStart = request.responseText.indexOf(OAUTHLIB_PIN_TWITTER_RESP_KEY);
+
+                if(nPosStart > 0){
+                    nPosStart += OAUTHLIB_PIN_TWITTER_RESP_KEY.length
+
+                    pinString = request.responseText.substring(nPosStart)
+
+                    var nPosEnd = pinString.indexOf(OAUTHLIB_PIN_END_TAG_TWITTER_RESP);
+
+                    if(nPosEnd > 0){
+                        pinString = pinString.substring(0, nPosEnd)
+
+                        console.log("PIN: " + pinString);
+                    }
+                }
+
+                onSuccess(pinString)
+            }
+            else onFailure(request.status, request.statusText)
+        }
+    }
+
+    request.setRequestHeader("Authorization", authorizationHeader)
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    request.setRequestHeader("User-Agent", USER_AGENT)
+    request.send(body)
+}
+
 
 function postAccessToken(token, tokenSecret, oauthVerifier, onSuccess, onFailure) {
     var accessor = {

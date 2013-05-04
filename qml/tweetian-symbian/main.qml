@@ -19,12 +19,13 @@
 import QtQuick 1.1
 import com.nokia.symbian 1.1
 import com.nokia.extras 1.1
-import QtMobility.feedback 1.1
+
 
 PageStackWindow {
     id: window
     initialPage: MainPage { id: mainPage }
-    showStatusBar: !inputContext.visible
+    //showStatusBar: !inputContext.visible
+    showStatusBar: false
     platformSoftwareInputPanelEnabled: true
     platformInverted: settings.invertedTheme
 
@@ -33,9 +34,6 @@ PageStackWindow {
     Settings { id: settings }
     Cache { id: cache }
     Constant { id: constant }
-
-    ThemeEffect { id: listItemHapticEffect; effect: ThemeEffect.BasicItem }
-    ThemeEffect { id: basicHapticEffect; effect: ThemeEffect.Basic }
 
     Text {
         anchors { top: parent.top; left: parent.left }
@@ -58,7 +56,7 @@ PageStackWindow {
         function showText(text) {
             infoBanner.text = text
             infoBanner.open()
-            infoBannerHapticEffect.play()
+            //infoBannerHapticEffect.play()
         }
 
         function showHttpError(errorCode, errorMessage) {
@@ -67,7 +65,6 @@ PageStackWindow {
             else showText(qsTr("Error: %1").arg(errorMessage + " (" + errorCode + ")"))
         }
 
-        ThemeEffect { id: infoBannerHapticEffect; effect: ThemeEffect.NeutralTacticon }
     }
 
     Item {
@@ -125,6 +122,8 @@ PageStackWindow {
 
         function createTweetLongPressMenu(model ) {
             if (!__tweetLongPressMenu) __tweetLongPressMenu = Qt.createComponent("Dialog/LongPressMenu.qml")
+
+
             __tweetLongPressMenu.createObject(pageStack.currentPage, { model: model })
         }
     }

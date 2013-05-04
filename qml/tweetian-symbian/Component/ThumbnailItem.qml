@@ -28,7 +28,7 @@ Item {
 
     signal clicked
 
-    width: constant.thumbnailSize; height: constant.thumbnailSize
+    width: constant.thumbnailSize * 2 ; height: constant.thumbnailSize * 2
     clip: true
 
     Image {

@@ -23,15 +23,17 @@ AbstractDelegate {
     id: root
     sideRectColor: {
         switch (settings.userScreenName) {
-        case model.inReplyToScreenName: return constant.colorTextSelection
+        case model.inReplyToScreenName: return platformInverted ? constant.colorTextSelection : "#3f3f3f"
         case model.screenName: return constant.colorLight
-        default: return "transparent"
+        default:
+            return platformInverted ? "white" : "#161616"
         }
     }
 
     Item {
         id: titleContainer
         anchors { left: parent.left; right: parent.right }
+        anchors.topMargin: 0
         height: userNameText.height
 
         Text {
@@ -46,7 +48,8 @@ AbstractDelegate {
         }
 
         Text {
-            anchors { left: userNameText.right; right: favouriteIconLoader.left; margins: constant.paddingSmall }
+            anchors { left: userNameText.right; right: favouriteIconLoader.left;
+                margins: constant.paddingXSmall }
             font.pixelSize: settings.largeFontSize ? constant.fontSizeMedium : constant.fontSizeSmall
             color: highlighted ? constant.colorHighlighted : constant.colorMid
             elide: Text.ElideRight
@@ -72,6 +75,7 @@ AbstractDelegate {
 
     Text {
         anchors { left: parent.left; right: parent.right }
+        //font.pixelSize: settings.largeFontSize ? constant.fontSizeMedium : constant.fontSizeSmall
         font.pixelSize: settings.largeFontSize ? constant.fontSizeMedium : constant.fontSizeSmall
         wrapMode: Text.Wrap
         color: highlighted ? constant.colorHighlighted : constant.colorLight
@@ -79,33 +83,54 @@ AbstractDelegate {
         text: model.richText
     }
 
-    Loader {
-        id: retweetLoader
+    Item{
+        height: model.isRetweet ? 46: 0
         anchors { left: parent.left; right: parent.right }
-        sourceComponent: model.isRetweet ? retweetText : undefined
+        Loader{
+        id: retweetImg
+            anchors { left: parent.left; }
+            sourceComponent: model.isRetweet ? retweetImgComponent : undefined
+        Component{
+            id: retweetImgComponent
+            Image {
 
-        Component {
-            id: retweetText
+                    sourceSize { height: 46; width: 46}
+                    source: platformInverted ? "../Image/retweet_inverse.png": "../Image/retweet.png"
+                }}
+    }
 
-            Text {
-                font.pixelSize: settings.largeFontSize ? constant.fontSizeMedium : constant.fontSizeSmall
-                wrapMode: Text.Wrap
-                color: highlighted ? constant.colorHighlighted : constant.colorMid
-                text: qsTr("Retweeted by %1").arg("@" + model.retweetScreenName)
+
+        Loader {
+            id: retweetLoader
+            anchors { left: retweetImg.right; leftMargin: 10}
+            sourceComponent: model.isRetweet ? retweetText : undefined
+            Component {
+                id: retweetText
+                    Text {
+                    font.pixelSize: settings.largeFontSize ? constant.fontSizeMedium : constant.fontSizeSmall
+                    wrapMode: Text.Wrap
+                    color: highlighted ? constant.colorHighlighted : constant.colorMid
+                    text: qsTr("Retweeted by %1").arg("@" + model.retweetScreenName)
+                    }
+
             }
         }
+
 
     }
 
     Text {
         anchors { left: parent.left; right: parent.right }
         horizontalAlignment: Text.AlignRight
-        font.pixelSize: settings.largeFontSize ? constant.fontSizeSmall : constant.fontSizeXSmall
+        font.pixelSize: settings.largeFontSize ? constant.fontSizeXSmall : constant.fontSizeXXSmall
         color: highlighted ? constant.colorHighlighted : constant.colorMid
         elide: Text.ElideRight
         text: model.source + " | " + model.timeDiff
     }
 
-    onClicked: pageStack.push(Qt.resolvedUrl("../TweetPage.qml"), { tweet: model })
+    onClicked: {
+        console.debug("click!!")
+        pageStack.push(Qt.resolvedUrl("../TweetPage.qml"), { tweet: model })
+    }
     onPressAndHold: dialog.createTweetLongPressMenu(model)
 }

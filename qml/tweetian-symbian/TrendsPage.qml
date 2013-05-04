@@ -34,22 +34,22 @@ Page {
 
     tools: ToolBarLayout {
         ToolButtonWithTip {
-            iconSource: "toolbar-back"
+            iconSource: "Image/ic_back_button.png"
             toolTipText: qsTr("Back")
             onClicked: pageStack.pop()
         }
         ToolButtonWithTip {
-            iconSource: settings.invertedTheme ? "Image/location_mark_inverse.svg" : "Image/location_mark.svg"
+            iconSource: "Image/location_mark.svg"
             toolTipText: qsTr("Nearby tweets")
             onClicked: pageStack.push(Qt.resolvedUrl("NearbyTweetsPage.qml"))
         }
         ToolButtonWithTip {
-            iconSource: "Image/people" + (settings.invertedTheme ? "_inverse.svg" : ".svg")
+            iconSource: "Image/people.svg"
             toolTipText: qsTr("Suggested Users")
             onClicked: pageStack.push(Qt.resolvedUrl("UserCategoryPage.qml"))
         }
         ToolButtonWithTip {
-            iconSource: "toolbar-menu"
+            iconSource: "Image/icon_menu.png"
             toolTipText: qsTr("Menu")
             onClicked: menu.open()
         }
@@ -95,11 +95,12 @@ Page {
                 id: titleText
                 anchors {
                     verticalCenter: parent.verticalCenter
-                    left: parent.paddingItem.left; right: parent.paddingItem.right
+                    leftMargin: platformStyle.paddingLarge
+                    left: parent.left
+                    //left: parent.paddingItem.left; right: parent.paddingItem.right
                 }
                 platformInverted: parent.platformInverted
                 mode: trendsListItem.mode
-                role: "Title"
                 text: model.title || model.completeWord
             }
 

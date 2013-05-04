@@ -34,19 +34,28 @@ QtObject {
     property color colorMarginLine: settings.invertedTheme ? platformStyle.colorDisabledLightInverted
                                                            : platformStyle.colorDisabledMid
 
+    property color colorBackground: settings.invertedTheme ? platformStyle.colorBackgroundInverted : platformStyle.colorBackground
     // padding size
+
+    property int paddingXSmall: platformStyle.paddingSmall - 4
     property int paddingSmall: platformStyle.paddingSmall
     property int paddingMedium: platformStyle.paddingMedium
     property int paddingLarge: platformStyle.paddingLarge
     property int paddingXLarge: platformStyle.paddingLarge + platformStyle.paddingSmall
 
     // font size
+    property int fontSizeXXSmall: platformStyle.fontSizeSmall - 4
     property int fontSizeXSmall: platformStyle.fontSizeSmall - 2
-    property int fontSizeSmall: platformStyle.fontSizeSmall
-    property int fontSizeMedium: platformStyle.fontSizeMedium
-    property int fontSizeLarge: platformStyle.fontSizeLarge
-    property int fontSizeXLarge: platformStyle.fontSizeLarge + 2
-    property int fontSizeXXLarge: platformStyle.fontSizeLarge + 6
+    property int fontSizeSmall: platformStyle.fontSizeSmall + 2
+    property int fontSizeMedium: platformStyle.fontSizeMedium + 6
+
+    //property int fontSizeXLarge: platformStyle.fontSizeLarge + 2
+    //property int fontSizeXXLarge: platformStyle.fontSizeLarge + 6
+
+    property int fontSizeLarge: platformStyle.fontSizeLarge + 2
+    property int fontSizeXLarge: platformStyle.fontSizeLarge + 4
+    property int fontSizeXXLarge: platformStyle.fontSizeLarge + 8
+
 
     // graphic size
     property int graphicSizeTiny: platformStyle.graphicSizeTiny
@@ -55,9 +64,13 @@ QtObject {
     property int graphicSizeLarge: platformStyle.graphicSizeLarge
 
     property int thumbnailSize: platformStyle.graphicSizeLarge * 1.5
+    property int avatarSize: platformStyle.graphicSizeLarge * 2.5
 
     // other
-    property int headerHeight: inPortrait ? 50 : 45
+    //property int headerHeight: inPortrait ? 50 : 45
+    property int headerHeight: inPortrait ? 90 : 85
+    property int footerHeight: inPortrait ? 120 : 100
+    property int toolbarHeight: inPortrait ? 180 : 160
 
     property int charReservedPerMedia: 23
     property url twitterBirdIcon: platformInverted ? "Image/twitter-bird-light.png" : "Image/twitter-bird-dark.png"
@@ -70,11 +83,11 @@ QtObject {
     // The provided Twitter OAuth cousumer key pair below are only for testing
     // The release version in Nokia Store have a different key pair
 
-    property string twitterConsumerKey: "0FB4Dd9xsgSHiGiCJ82L1g"
-    property string twitterConsumerSecret: "VgRBngFVKH9Rm2cG9OgJHACpHr6a2IvcKXxh49FvU"
+    property string twitterConsumerKey: "WalyIMC448nj7XjMhpqEw"
+    property string twitterConsumerSecret: "lCyIuHc5QQOmCxPKu9gdhrR02a5KjqN8GQFgWV0kk"
 
     // Needed for uploading image to TwitPic
-    property string twitpicAPIKey: ""
+    property string twitpicAPIKey: "eee0c8a184f3330352ed1dd9398e4189"
 
     // Needed for uploading image to Moby.ly
     property string mobypictureAPIKey: ""

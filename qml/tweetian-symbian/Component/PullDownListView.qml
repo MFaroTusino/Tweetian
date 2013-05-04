@@ -39,6 +39,7 @@ ListView {
         if (__toBeRefresh) {
             pulledDown()
             __toBeRefresh = false
+
         }
     }
     onContentYChanged: detectPullDownTimer.running = true
@@ -48,4 +49,7 @@ ListView {
         interval: 250
         onTriggered: if (__wasAtYBeginning && __initialContentY - contentY > 100) __toBeRefresh = true
     }
+
 }
+
+
