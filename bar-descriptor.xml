@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<qnx xmlns="http://www.qnx.com/schemas/application/1.0">
+    <id>com.bb4.apps.twitter.Tweetian</id>
+    <name>Tweetian</name>
+    <versionNumber>1.0.4</versionNumber>
+    <description>Twitter client.</description>
+    <initialWindow>
+        <systemChrome>none</systemChrome>
+        <transparent>false</transparent>
+    </initialWindow>
+    <author>BB4 Software</author>
+    <copyright>COPYRIGHT</copyright>
+    <env value="app/native/qml/imports:/usr/lib/qt4/imports" var="QML_IMPORT_PATH"/>
+    <env value="app/native/plugins:app/native/qml/lib:/usr/lib/qt4/plugins" var="QT_PLUGIN_PATH"/>
+    <env value="app/native/qml/lib:/usr/lib/qt4/lib/:/usr/lib" var="LD_LIBRARY_PATH"/>
+    <arg>-style</arg>
+    <arg>qnxlight</arg>
+    <action system="true">run_native</action>
+    <action>access_shared</action>
+    <action>read_geolocation</action>
+    <action>use_camera</action>
+    <action>access_internet</action>
+    <!-- Tweetian should point to the project binary, path can be relative -->
+    <asset path="Tweetian" type="Qnx/Elf" entry="true">Tweetian</asset>
+    <asset path="/home/laliux/dev/bb10/qt-workspace-2.8.4/Tweetian/qml">qml</asset>
+    <asset path="/home/laliux/dev/bb10/qt-workspace-2.8.4/Tweetian/qml/tweetian-symbian/Image/tweetian.png">tweetian.png</asset>
+    <asset path="/home/laliux/dev/bb10/qt-workspace-2.8.4/Tweetian/splash/tweetian-splash-symbian.jpg">tweetian-splash-symbian.jpg</asset>
+    <asset path="/home/laliux/dev/bb10/qt-workspace-2.8.4/Tweetian/i18n">i18n</asset>
+    <asset path="/home/laliux/dev/bb10/qt-workspace-2.8.4/Tweetian/splash">splash</asset>
+    <asset path="/home/laliux/dev/bb10/qt-workspace-2.8.4/Tweetian/audio">audio</asset>
+    <!-- I had problems using relative paths, therefore I'm using absolute paths: Eduardo -->
+    <icon>
+        <image>tweetian.png</image>
+    </icon>
+    <authorId>HERE_YOUR_AUTHORID</authorId>
+    <splashscreens>
+        <image>tweetian-splash-symbian.jpg</image>
+    </splashscreens>
+</qnx>
