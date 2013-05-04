@@ -87,7 +87,7 @@ QtObject {
     property string twitterConsumerSecret: "YOUR_CONSUMER_SECRET"
 
     // Needed for uploading image to TwitPic
-    property string twitpicAPIKey: "eee0c8a184f3330352ed1dd9398e4189"
+    property string twitpicAPIKey: "YOUR_TWITPIC_KEY"
 
     // Needed for uploading image to Moby.ly
     property string mobypictureAPIKey: ""
