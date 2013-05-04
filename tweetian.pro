@@ -1,86 +1,66 @@
-TEMPLATE = app
-TARGET = tweetian
+# Add more folders to ship with the application, here
+folder_01.source = qml/imports
+folder_01.target = qml
+folder_02.source = qml/lib
+folder_02.target = lib
+
+DEPLOYMENTFOLDERS = folder_01 folder_02
 
 # Application version
-VERSION = 1.8.1
+VERSION = 1.0.4
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES += QMLJSDEBUGGER
 
-# Qt Library
+
+# Additional import path used to resolve QML modules in Creator's code model
+QML_IMPORT_PATH =
+
+# If your application uses the Qt Mobility libraries, uncomment the following
+# lines and add the respective components to the MOBILITY variable.
+#CONFIG += mobility
+CONFIG += qt-components
+
 QT += network
+QT += xml
 
-# Qt Mobility Library
-CONFIG += mobility
-MOBILITY += feedback location gallery
 
 HEADERS += \
     src/qmlutils.h \
     src/thumbnailcacher.h \
     src/userstream.h \
     src/networkmonitor.h \
-    src/imageuploader.h
+    src/imageuploader.h \
+    src/socialinvocation.h \
 
-SOURCES += main.cpp \
+
+
+# The .cpp file which was generated for your project. Feel free to hack it.
+SOURCES += \
+    main.cpp \
     src/qmlutils.cpp \
     src/thumbnailcacher.cpp \
     src/userstream.cpp \
     src/networkmonitor.cpp \
-    src/imageuploader.cpp
+    src/imageuploader.cpp \
+    src/socialinvocation.cpp \
 
-simulator{
-    qml_harmattan.source = qml/tweetian-harmattan
-    qml_harmattan.target = qml
-    qml_symbian.source = qml/tweetian-symbian
-    qml_symbian.target = qml
-    DEPLOYMENTFOLDERS = qml_harmattan qml_symbian
 
-    RESOURCES += qml-harmattan.qrc qml-symbian.qrc
-}
+LIBS += -lQtLocationSubset
+LIBS += -lbbcascadespickers
+LIBS += -lbbsystem
 
-simulator|contains(MEEGO_EDITION,harmattan){
-    include(notifications/notifications.pri)
-
-    splash.files = splash/tweetian-splash-portrait.jpg splash/tweetian-splash-landscape.jpg
-    splash.path = /opt/tweetian/splash
-
-    INSTALLS += splash
-
-    HEADERS += src/harmattanutils.h
-    SOURCES += src/harmattanutils.cpp
-}
-
-contains(MEEGO_EDITION,harmattan){
-    QT += dbus
-    CONFIG += qdeclarative-boostable shareuiinterface-maemo-meegotouch share-ui-plugin share-ui-common mdatauri
-    DEFINES += Q_OS_HARMATTAN
-    RESOURCES += qml-harmattan.qrc
-
-    HEADERS += src/tweetianif.h
-    SOURCES += src/tweetianif.cpp
-}
-
-symbian{
-    TARGET.UID3 = 0x2005e90a
-    TARGET.CAPABILITY += NetworkServices Location LocalServices ReadUserData WriteUserData
-    TARGET.EPOCHEAPSIZE = 0x40000 0x4000000
-
-    CONFIG += qt-components
-    vendorinfo += "%{\"Dickson\"}" ":\"Dickson\""
-    my_deployment.pkg_prerules = vendorinfo
-    DEPLOYMENT += my_deployment
-    DEPLOYMENT.display_name = Tweetian
-    ICON = Tweetian.svg
-    RESOURCES += qml-symbian.qrc
-
-    # Symbian have a different syntax
-    DEFINES -= APP_VERSION=\\\"$$VERSION\\\"
-    DEFINES += APP_VERSION=\"$$VERSION\"
-}
-
-OTHER_FILES += qtc_packaging/debian_harmattan/* \
-    i18n/tweetian_*.ts \
-    tweetian_harmattan.desktop \
-    README.md
+# Installation path
+# target.path =
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
 qtcAddDeployment()
+
+OTHER_FILES += i18n/tweetian_*.ts \
+    bar-descriptor.xml
+
+
+INCLUDEPATH += $$PWD/qml
+DEPENDPATH += $$PWD/qml
+
+#include(qtblackberryaudio/qtblackberryaudio.pri)
